@@ -1,15 +1,17 @@
 <template>
   <div class="home">
     <header class="row" >
-      <div class="col s2">
-        <img style="width:42%" class="responsive-img circle" src="../../public/img/uatu.jpg">
+      <div class="col s3 l2">
+        <img style="height:90px" class="responsive-img circle" src="../../public/img/uatu.jpg">
       </div>
-      <div class="col s10">
+      <div class="col s9 l10">
         <h4>Uatu</h4>
+        <p  v-if="isWriting">Está digitando....</p>
       </div>
     </header>
-    <main>
-      <div class="row" v-for="conversation in conversations" v-bind:key="conversation.id">
+    <main v-chat-scroll>
+      <ul class="message" >
+      <li class="row message" v-for="conversation in conversations" v-bind:key="conversation.id" >
         <div class="col s12">
         <div class="sended" v-if="conversation.type=='send'">
             {{conversation.message}}
@@ -18,17 +20,19 @@
           {{conversation.message}}
         </div>
       </div>
-      </div>
+      </li>
+      </ul>
     </main> 
     <footer >
       <div class="row">
+        <form @submit.prevent="submit">
       <div class="col s11">   
-      <textarea class="materialize-textarea" v-model="message">
-      </textarea>
+      <input class="validate" v-model="message" required>
       </div>
       <div class="col s1">
-      <button class="send" @click="submit"><i class="material-icons">send</i></button>
+      <button type="submit" class="send" ><i class="material-icons">send</i></button>
       </div>
+        </form>
       </div>
     </footer>
   </div>
@@ -39,19 +43,44 @@ export default {
   data() {
     return {
         message:'',
-        conversations:[]
+        conversations:[],
+        isWriting:false
     }
   },
-  methods:{
-    submit(){
-    this.conversations.push({type:'send',message:this.message})
-      fetch('https://chatbot-uatu.herokuapp.com/api/message',{
+  created(){
+fetch('https://chatbot-uatu.herokuapp.com/api/message',{
         method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
         body:JSON.stringify({
           message:this.message
         })
       }).then((data)=>data.json()).then((data)=>{
         this.conversations.push({type:'receive',message:data.messageResponse})
+        })
+  },
+  methods:{
+    submit(){
+      if(this.message.trim==''){
+        return
+      }
+      this.isWriting=true
+      this.message=''
+    this.conversations.push({type:'send',message:this.message})
+      fetch('https://chatbot-uatu.herokuapp.com/api/message',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({
+          message:this.message
+        })
+      }).then((data)=>data.json()).then((data)=>{
+        
+        this.conversations.push({type:'receive',message:data.messageResponse})
+        this.isWriting=false
+        window.scrollTo(0,document.getElementsByTagName('main')[0].scrollHeight)
         })
     }
   }
@@ -86,7 +115,7 @@ body {
     background-color:#275287;
    color: #E4E947
  }
- footer textarea{
+ footer input{
    color: #fff;
  }
  header{
