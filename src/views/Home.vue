@@ -66,10 +66,10 @@ fetch('https://chatbot-uatu.herokuapp.com/api/message',{
         return
       }
       this.isWriting=true
-      this.conversations.push({type:'receive',message:data.messageResponse})
+     this.conversations.push({type:'send',message:this.message})
       let message= this.message
       this.message=''
-    this.conversations.push({type:'send',message:this.message})
+    
       fetch('https://chatbot-uatu.herokuapp.com/api/message',{
         method:'POST',
         headers:{
@@ -79,7 +79,7 @@ fetch('https://chatbot-uatu.herokuapp.com/api/message',{
           message:message
         })
       }).then((data)=>data.json()).then((data)=>{
-        
+         this.conversations.push({type:'receive',message:data.messageResponse})
         
         this.isWriting=false
         window.scrollTo(0,document.getElementsByTagName('main')[0].scrollHeight)
