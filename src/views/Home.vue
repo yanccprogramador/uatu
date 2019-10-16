@@ -66,6 +66,8 @@ fetch('https://chatbot-uatu.herokuapp.com/api/message',{
         return
       }
       this.isWriting=true
+      this.conversations.push({type:'receive',message:data.messageResponse})
+      let message= this.message
       this.message=''
     this.conversations.push({type:'send',message:this.message})
       fetch('https://chatbot-uatu.herokuapp.com/api/message',{
@@ -74,11 +76,11 @@ fetch('https://chatbot-uatu.herokuapp.com/api/message',{
           'Content-Type':'application/json'
         },
         body:JSON.stringify({
-          message:this.message
+          message:message
         })
       }).then((data)=>data.json()).then((data)=>{
         
-        this.conversations.push({type:'receive',message:data.messageResponse})
+        
         this.isWriting=false
         window.scrollTo(0,document.getElementsByTagName('main')[0].scrollHeight)
         })
